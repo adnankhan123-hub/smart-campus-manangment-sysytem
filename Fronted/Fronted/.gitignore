@@ -1,0 +1,19 @@
+
+# Dependencies
+Backend/node_modules/
+Fronted/Fronted/node_modules/
+
+# Environment secrets
+Backend/.env
+Fronted/Fronted/.env
+Fronted/Fronted/.env.local
+
+# Build files
+Fronted/Fronted/dist/
+
+# Logs
+*.log
+
+# Operating system
+.DS_Store
+Thumbs.db
