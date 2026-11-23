@@ -1,77 +1,24 @@
+
 const User = require("../models/User.js");
 const bcrypt = require("bcryptjs");
-
 const jwt = require("jsonwebtoken");
 
-// SIGN UP
-async function signup(req, res) {
-try {
-const { name, email, password } = req.body;
-
-    // Check required fields
-    if (!name || !email || !password) {
-        return res.status(400).json({
-            message: "Name, email, and password are required"
-        });
-    }
-
-    // Check if email already exists
-    const existingUser = await User.findOne({
-        email: email.toLowerCase()
-    });
-
-    if (existingUser) {
-        return res.status(409).json({
-            message: "Email is already registered"
-        });
-    }
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Save the user in MongoDB
-    const user = await User.create({
-        name,
-        email: email.toLowerCase(),
-        password: hashedPassword
-    });
-
-    res.status(201).json({
-        message: "Account created successfully",
-        user: {
-            id: user._id,
-            name: user.name,
-            email: user.email
-        }
-    });
-
-} catch (error) {
-    console.error("Signup error:", error.message);
-
-    res.status(500).json({
-        message: "Failed to create account"
-    });
-}
-
-}
-
-module.exports = { signup };
-
-
-
-// SIGN UP
+// SIGNUP
 async function signup(req, res) {
     try {
         const { name, email, password } = req.body;
 
+        // Check required fields
         if (!name || !email || !password) {
             return res.status(400).json({
                 message: "Name, email, and password are required"
             });
         }
 
+        // Normalize email
         const normalizedEmail = email.trim().toLowerCase();
 
+        // Check existing user
         const existingUser = await User.findOne({
             email: normalizedEmail
         });
@@ -82,12 +29,15 @@ async function signup(req, res) {
             });
         }
 
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Create normal user
         const user = await User.create({
             name: name.trim(),
             email: normalizedEmail,
-            password: hashedPassword
+            password: hashedPassword,
+            role: "user"
         });
 
         res.status(201).json({
@@ -95,9 +45,11 @@ async function signup(req, res) {
             user: {
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             }
         });
+
     } catch (error) {
         console.error("Signup error:", error.message);
 
@@ -118,6 +70,7 @@ async function login(req, res) {
             });
         }
 
+        // Find user
         const user = await User.findOne({
             email: email.trim().toLowerCase()
         });
@@ -128,6 +81,7 @@ async function login(req, res) {
             });
         }
 
+        // Compare password
         const isPasswordCorrect = await bcrypt.compare(
             password,
             user.password
@@ -139,8 +93,12 @@ async function login(req, res) {
             });
         }
 
+        // Generate JWT with user ID and role
         const token = jwt.sign(
-            { userId: user._id },
+            {
+                userId: user._id,
+                role: user.role
+            },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
@@ -151,9 +109,11 @@ async function login(req, res) {
             user: {
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             }
         });
+
     } catch (error) {
         console.error("Login error:", error.message);
 

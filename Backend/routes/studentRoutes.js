@@ -1,5 +1,7 @@
-const authMiddleware = require("../middleware/authMiddleware");
-const express = require("express");
+const {
+    authMiddleware,
+    adminMiddleware
+} = require("../middleware/authMiddleware");const express = require("express");
 const router = express.Router();
 
 const {
@@ -17,6 +19,5 @@ router.get("/", getStudents);
 router.post("/", authMiddleware, createStudent);
 router.delete("/:id", authMiddleware, deleteStudent);
 
-// Keep your existing student routes below this line.
 
 module.exports = router;

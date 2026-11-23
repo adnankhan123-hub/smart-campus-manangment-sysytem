@@ -40,11 +40,13 @@ function Login({ onSignupPage, onLoginSuccess }) {
                 throw new Error(data.message || "Login failed");
             }
 
-            if (!data.token) {
-                throw new Error("The server did not return a token");
+            if (!data.token || !data.user) {
+                throw new Error("Token or user information is missing");
             }
 
-            onLoginSuccess(data.token);
+            // Send token and user information to App.jsx
+            onLoginSuccess(data.token, data.user);
+
         } catch (error) {
             setMessage(error.message || "Could not connect to server");
         } finally {
